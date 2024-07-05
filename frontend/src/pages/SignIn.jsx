@@ -19,7 +19,7 @@ export default function SignIn() {
     e.preventDefault();
     try {
       setLoading(true)
-      const res=await fetch('/api/auth/signup',{
+      const res=await fetch('/api/auth/signin',{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify(formData)
@@ -33,7 +33,7 @@ export default function SignIn() {
       else{
       setLoading(false)
       setError(null)
-      navigate('/signin')
+      navigate('/')
       console.log(data);
     }
       
@@ -57,7 +57,7 @@ export default function SignIn() {
       {loading? loading :'signin'}</button>
    </form>
    <div className='flex justify-center items-center gap-2'>
-    <p>don`t` have an account</p><Link to='/signin' className='text-gray-400'>signin</Link>
+    <p>don`t` have an account</p><Link to='/signup' className='text-gray-400'>signup</Link>
    </div>
    <div>{error &&(
     <div className='text-red-700'>{error}</div>
