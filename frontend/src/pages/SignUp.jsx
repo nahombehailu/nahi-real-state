@@ -30,10 +30,12 @@ export default function SignUp() {
         setError(data.message)
         setLoading(false)
       }
+      else{
       setLoading(false)
       setError(null)
       navigate('/signin')
       console.log(data);
+    }
       
     } catch (error) {
       setLoading(false)
@@ -47,19 +49,22 @@ export default function SignUp() {
   console.log(formData);
 
   return (
-    <div>
-   <form onSubmit={handleSubmit}>
-    <label htmlFor="username">username</label><br />
-    <input type="text" id='username' onChange={handleChange} /><br />
-    <label htmlFor="email">email</label><br />
-    <input type="text" id='email' onChange={handleChange} /><br />
-    <label htmlFor="password">password</label><br />
-    <input type="text" id='password' onChange={handleChange} /><br />
-    <button disabled={loading} className='text-red-300 rounded bg-green-300'>
+    <div className=''>
+   <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center px-20 mt-20'>
+    <label htmlFor="username">username</label>
+    <input type="text" id='username' onChange={handleChange} placeholder='username' className='py-2 px-10 rounded-md  focus:outline-none' />
+    <label htmlFor="email">email</label>
+    <input type="text" id='email' onChange={handleChange}  placeholder='email' className='py-2 px-10 rounded-md focus:outline-none' />
+    <label htmlFor="password">password</label>
+    <input type="text" id='password' onChange={handleChange}  placeholder='password' className='py-2 px-10 rounded-md focus:outline-none'/>
+    <button disabled={loading} className='text-red-300 rounded bg-green-700 m-3 py-2 px-10'>
       {loading? loading :'signup'}</button>
    </form>
+   <div className='flex justify-center items-center gap-2'>
+    <p>do you have an account</p><Link to='/signin' className='text-gray-400'>signin</Link>
+   </div>
    <div>{error &&(
-    <p className='text-red-700'>{error}</p>
+    <div className='text-red-700'>{error}</div>
    )}
    </div>
     </div>

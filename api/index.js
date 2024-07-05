@@ -5,6 +5,7 @@ import authRouter from './routes/auth.js'
 import userRouter from './routes/userRouter.js'
 import User from './models/userModel.js'
 import cors from 'cors'
+
 dotenv.config()
 
 
