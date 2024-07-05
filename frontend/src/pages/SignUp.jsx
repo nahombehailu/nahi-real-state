@@ -4,7 +4,6 @@ export default function SignUp() {
   const [formData,setFormData]=useState({});
 
 
-
   const handleChange=(e)=>{
     setFormData({...formData,
       [e.target.id]:e.target.value,
@@ -12,13 +11,20 @@ export default function SignUp() {
   }
   const handleSubmit=async(e)=>{
     e.preventDefault();
-    const res=await fetch('http://localhost:3000/api/authsignup',{
-      method:"POST",
-      body:JSON.stringify(formData)
-    })
+    try {
+      const res=await fetch('/api/auth/signup',{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(formData)
+      })
+  
+      const data= await res.json()
+      console.log(data);
+      
+    } catch (error) {
+      console.log(error.message);
+    }
 
-    const data= await res.json()
-    console.log(data);
 
   }
 
@@ -33,7 +39,7 @@ export default function SignUp() {
     <input type="text" id='email' onChange={handleChange} /><br />
     <label htmlFor="password">password</label><br />
     <input type="text" id='password' onChange={handleChange} /><br />
-    <button type='submit' className='text-red-300 rounded bg-green-300'>signup</button>
+    <button className='text-red-300 rounded bg-green-300'>signup</button>
    </form>
     </div>
   )
