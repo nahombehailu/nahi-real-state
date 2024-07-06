@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
 import {Link,useNavigate} from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { signFailure,signInStart,signSuccess } from '../redux/user/userSlice';
+
 
 export default function SignIn() {
   const [formData,setFormData]=useState({});
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState(null);
+  const {error,loading}=useSelector((state)=>state.user)
   const navigate=useNavigate()
+  const dispatch=useDispatch()
 
 
-
-
-  const handleChange=(e)=>{
+const handleChange=(e)=>{
     setFormData({...formData,
       [e.target.id]:e.target.value,
     })
@@ -18,7 +19,7 @@ export default function SignIn() {
   const handleSubmit=async(e)=>{
     e.preventDefault();
     try {
-      setLoading(true)
+      dispatch(signInStart())
       const res=await fetch('/api/auth/signin',{
         method:"POST",
         headers:{"Content-Type":"application/json"},
@@ -27,19 +28,16 @@ export default function SignIn() {
   
       const data= await res.json()
       if(data.success===false){
-        setError(data.message)
-        setLoading(false)
+        dispatch(signFailure(data.message))
       }
-      else{
-      setLoading(false)
-      setError(null)
+     else{
+      dispatch(signSuccess(data))
       navigate('/')
       console.log(data);
     }
       
     } catch (error) {
-      setLoading(false)
-      console.log(error.message);
+      dispatch(signFailure(error.message))
 
     }
 
@@ -48,7 +46,7 @@ export default function SignIn() {
 
   console.log(formData);
   return (
-    <div className=''>
+    <div className='w-full'>
    <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center px-20 mt-20'>
     <input type="text" id='email' onChange={handleChange}  placeholder='email' className='py-2 px-10 rounded-md focus:outline-none' />
     <label htmlFor="password">password</label>
