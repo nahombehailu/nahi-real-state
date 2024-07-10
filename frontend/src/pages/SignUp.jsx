@@ -50,15 +50,15 @@ export default function SignUp() {
   console.log(formData);
 
   return (
-    <div className=''>
-   <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center px-20 mt-20'>
-    <label htmlFor="username">username</label>
-    <input type="text" id='username' onChange={handleChange} placeholder='username' className='py-2 px-10 rounded-md  focus:outline-none' />
-    <label htmlFor="email">email</label>
+    <div className="max-w-lg mx-auto">
+   <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center px-20 mt-20 gap-2 bg-slate-600 p-5'>
+  
+    <input type="text" id='username' onChange={handleChange} placeholder='username' className='py-2 px-10 rounded-md  focus:outline-none ' />
+  
     <input type="text" id='email' onChange={handleChange}  placeholder='email' className='py-2 px-10 rounded-md focus:outline-none' />
-    <label htmlFor="password">password</label>
+
     <input type="text" id='password' onChange={handleChange}  placeholder='password' className='py-2 px-10 rounded-md focus:outline-none'/>
-    <button disabled={loading} className='text-red-300 rounded bg-green-700 m-3 py-2 px-10'>
+    <button disabled={loading} className='text-red-300 rounded bg-green-700 m-3 w-full p-2'>
       {loading? loading :'signup'}</button>
       <OAuth />
    </form>

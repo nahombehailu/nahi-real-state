@@ -27,14 +27,16 @@ export default function OAuth() {
           )
         })
         const data= await res.json()
+
         if(data.success ===false){
           dispatch(signFailure(data.message))
        
         }
-
-        dispatch(signSuccess(data))
+else{
+  console.log(data);
+  dispatch(signSuccess(data))
         navigate('/')
-  
+      }
       } catch (error) {
         console.log(error);
       }
@@ -43,7 +45,7 @@ export default function OAuth() {
 
     }
   return (
-    <button type='button'onClick={handleGoogleClick} className='text-white bg-red-700 p-3 sm:w-full' >
+    <button type='button'onClick={handleGoogleClick} className='text-white bg-red-700 p-2 ree sm:w-full' >
       Countinue with Google
     </button>
   )
