@@ -12,9 +12,9 @@ export const signup= async (req,res,next)=>{
 
     const {username,email,password}=req.body;
     
-    // if(!username || !email  || !password || email==='' || username==="" || password===""){
-    //     next(errorHandler(550,"all fields are required"))
-    // }
+    if( !email  || !password || email==='' || username===""){
+        return next(errorHandler(4010,"all fields are required"))
+    }
 
     try {
         const hashed_password=bcrypt.hashSync(password)
@@ -31,6 +31,9 @@ export const signup= async (req,res,next)=>{
 
 export const signin=async (req,res,next)=>{
     const {email,password}=req.body;
+    if(!email  || !password || email==='' || password===""){
+        return next(errorHandler(550,"all fields are required"))
+    }
     try {
         const validUser= await User.findOne({email})
         if(!validUser) return next(errorHandler(404,"user not found"))
