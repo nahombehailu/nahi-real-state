@@ -13,18 +13,26 @@
 //     }
 //   }
 // }
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { signFailure, signInStart, signSuccess } from '../redux/user/userSlice'; 
+import { updateUserFailure,updateUserStart,updateUserSuccess,deleteUserSuccess,deleteUserFailure,deleteUserStart,signOutUserFailure,signOutUserStart,signOutUserSuccess } from '../redux/user/userSlice'; 
 import { useNavigate } from 'react-router-dom';
+import {getDownloadURL, getStorage,ref, uploadBytesResumable} from 'firebase/storage'
+import { app } from '../firebase';
 
 export default function Profiles() {
   const [formData, setFormData] = useState({});
-  const { currentUser } = useSelector((state) => state.persistedReducer.user);
+  const { currentUser,loading,error } = useSelector((state) => state.persistedReducer.user);
   const fileRef = useRef(null);
+  const [flle,setFile]=useState(undefined)
+  const [fllePerc,setFilePerc]=useState(0)
+   const [flleError,setFileflleError]=useState(false)
+   const [updateSucess,setUpdateSucess]=useState(false)
   const dispatch = useDispatch();
   const navigate=useNavigate();
-  const [updateSucess,setUpdateSucess]=useState(false)
+
+
 
   const handleChange = (e) => {
     setFormData({ ...formData,
@@ -34,7 +42,7 @@ export default function Profiles() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(signInStart());
+      dispatch(updateUserStart());
       const res = await fetch(`api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,20 +51,95 @@ export default function Profiles() {
 
       const data = await res.json();
       if (data.success === false) {
-      console.log("error")
-      }
-
-      else{
+     dispatch(updateUserFailure(data.message))
     
+      }
+      else{
+      dispatch(updateUserSuccess(data))
       setUpdateSucess(true)
-
-      console.log(data);
-      console.log(formData);
     }
     } catch (error) {
-     console.log(error.message);
+     dispatch(updateUserFailure(error.message))
     }
   };
+
+  const handeleDelete =async()=>{
+    try {
+      dispatch(deleteUserStart())
+      const res=await fetch(`api/user/delete/${currentUser._id}`,
+        {
+          method:'DELETE'
+        }
+        )
+
+        const data = await res.json();
+        if (data.success === false) {
+       dispatch(deleteUserFailure(data.message))
+      
+        }
+        else{
+        dispatch(deleteUserSuccess(data))
+      
+        }
+    } catch (error) {
+      dispatch(deleteUserFailure(error))
+    }
+  }
+
+  const handleSignOut =async()=>{
+    try {
+      dispatch(signOutUserStart())
+      const res=await fetch('api/auth/signout',
+        {
+          method:'GET'
+        }
+        )
+
+        const data = await res.json();
+        if (data.success === false) {
+       dispatch(signOutUserFailure(data.message))
+      
+        }
+        else{
+        dispatch(signOutUserSuccess(data))
+      
+        }
+    } catch (error) {
+      dispatch(signOutUserFailure(error))
+    }
+  }
+
+
+useEffect(()=>{
+  if(flle){
+    handleUploadFile(flle)
+  }
+
+},[flle]);
+
+const handleUploadFile=(file)=>{
+  const storage=getStorage(app)
+  const filename=new Date().getTime + file.className
+  const filenameRef=ref(storage,filename)
+  const uploadTask=uploadBytesResumable(filenameRef,file)
+  uploadTask.on('state_changed',
+    (snapshot)=>{
+      const progress=(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      setFilePerc(Math.round(progress))
+    
+    },
+    (error)=>{
+      setFileflleError(error)
+    },
+    ()=>{
+  getDownloadURL(uploadTask.snapshot.ref).then(
+    (downloadURL)=>{
+      setFormData({...formData,avatar:downloadURL})
+    }
+  )
+    }
+  )
+}
 
   return (
     <div className="max-w-lg mx-auto">
@@ -67,14 +150,27 @@ export default function Profiles() {
           ref={fileRef}
           accept="image/*"
           hidden
+          onChange={(e)=>setFile(e.target.files[0])}
         
         />
         <img
           onClick={() => fileRef.current.click()}
-          src={currentUser.avatar}
+          src={ formData.avatar || currentUser.avatar}
           alt="profile"
           className=" w-24 h-24 cursor-pointer rounded-full self-center my-4"
         />
+        <p>
+          {flleError ? (
+            <span className='text-red'>upload not successfull</span>):
+            (fllePerc >0 && fllePerc < 100)?
+            (<span>`upload ${fllePerc}</span>):
+            (fllePerc===100)?(
+              <span className='text-green-400 self-center'>image uploaded succesfully</span>
+            ):
+          ''
+          
+          }
+        </p>
         <input
           type="text"
           placeholder="username"
@@ -99,12 +195,14 @@ export default function Profiles() {
           
           className="p-1 rounded-lg focus:outline-none"
         />
-        <button type='submit' className="p-2 bg-green-500 text-white uppercase">update</button>
+        <button type='submit' disabled={loading} className="p-2 bg-green-500 text-white uppercase">{loading ? 'loading...':'update'}</button>
       </form>
-      {updateSucess &&(<p>user updated successfully</p>)}
+     {/* <p> {updateSucess ?
+     ('user updated successfully'):("")}</p> */}
+     {error ? (<p className='text-blue-500'>{error}</p>):(updateSucess ? "user updated successfully":"")}
       <div className="flex justify-between my-4">
-        <span className="text-red-600 bg-slate-100 p-2">delete account</span>
-        <span className="text-red-600 bg-slate-100 p-2">signout</span>
+        <button onClick={handeleDelete} className="text-red-600 bg-slate-100 p-2 cursor-pointer hover:text-red-300">delete account</button>
+        <button  onClick ={handleSignOut}className="text-red-600 bg-slate-100 p-2">signout</button>
       </div>
     </div>
   );

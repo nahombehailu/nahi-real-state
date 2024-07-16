@@ -6,6 +6,8 @@ import userRouter from './routes/userRouter.js'
 import User from './models/userModel.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import listingRouter from './routes/listingRoute.js'
+
 
 dotenv.config()
 
@@ -29,6 +31,8 @@ app.listen(3000,()=>{
 
 app.use('/api/auth',authRouter)
 app.use('/api/user',userRouter)
+app.use('/api/listing',listingRouter)
+
 
 
 app.use((err,req,res,next)=>{

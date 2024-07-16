@@ -7,8 +7,8 @@ import OAuth from '../componets/OAuth';
 
 export default function SignIn() {
   const [formData,setFormData]=useState({});
-  const error=useSelector((state)=>(state.user));
-  const loading=useSelector((state)=>(state.user));
+  const { currentUser,loading,error } = useSelector((state) => state.persistedReducer.user);
+
   const navigate=useNavigate()
   const dispatch=useDispatch()
 
@@ -31,11 +31,12 @@ const handleChange=(e)=>{
       const data= await res.json()
       if(data.success===false){
         dispatch(signFailure(data.message))
+        return;
       }
  
       dispatch(signSuccess(data))
       navigate('/')
-      console.log(data);
+    
   
       
     } catch (error) {
@@ -62,10 +63,10 @@ const handleChange=(e)=>{
    <div className='flex justify-center items-center gap-2'>
     <p>don`t` have an account</p><Link to='/signup' className='text-gray-400'>signup</Link>
    </div>
-   <div>{error &&(
-    <div className='text-red-700'>{error}</div>
-   )}
-   </div>
+   <p  className='text-center'>{error ?(
+    error
+   ):""}
+   </p>
     </div>
   )
 }
