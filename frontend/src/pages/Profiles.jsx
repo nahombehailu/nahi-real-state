@@ -17,9 +17,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUserFailure,updateUserStart,updateUserSuccess,deleteUserSuccess,deleteUserFailure,deleteUserStart,signOutUserFailure,signOutUserStart,signOutUserSuccess } from '../redux/user/userSlice'; 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,Link} from 'react-router-dom';
 import {getDownloadURL, getStorage,ref, uploadBytesResumable} from 'firebase/storage'
 import { app } from '../firebase';
+
 
 export default function Profiles() {
   const [formData, setFormData] = useState({});
@@ -119,7 +120,7 @@ useEffect(()=>{
 
 const handleUploadFile=(file)=>{
   const storage=getStorage(app)
-  const filename=new Date().getTime + file.className
+  const filename=new Date().getTime + file.name
   const filenameRef=ref(storage,filename)
   const uploadTask=uploadBytesResumable(filenameRef,file)
   uploadTask.on('state_changed',
@@ -196,6 +197,10 @@ const handleUploadFile=(file)=>{
           className="p-1 rounded-lg focus:outline-none"
         />
         <button type='submit' disabled={loading} className="p-2 bg-green-500 text-white uppercase">{loading ? 'loading...':'update'}</button>
+        <Link to='create-listing' className='bg-slate-700 text-white my-5 border p-3 rounded-lg uppercase border-green-500 hover:bg-slate-500 disabled:opacity-80
+        
+        '>Create-Listing</Link>
+      
       </form>
      {/* <p> {updateSucess ?
      ('user updated successfully'):("")}</p> */}

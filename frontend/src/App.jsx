@@ -19,7 +19,7 @@ export default function App() {
   <Route path='/signup' element={<SignUp />} />
   <Route element={<PrivateRoute />}>
   <Route path='/profiles' element={<Profiles  />} />
-  <Route path='/create-listing' element={<CreateListing  />} />
+  <Route path='/profiles/create-listing' element={<CreateListing  />} />
   </Route>
 </Routes>
 
