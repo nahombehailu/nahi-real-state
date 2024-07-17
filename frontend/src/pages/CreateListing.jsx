@@ -5,6 +5,7 @@ import { app } from '../firebase'
 export default function CreateListing() {
   const [files, setFiles] = useState([])
   const[imageUploadError,setImageUploadError]=useState(false)
+  const [uploading ,setUploading]=useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -23,6 +24,8 @@ export default function CreateListing() {
 
   console.log(formData);
   const handleImageUpload = () => {
+    setUploading(true)
+    setImageUploadError(false)
     const promises = []
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
       for (let i = 0; i < files.length; i++) {
@@ -30,12 +33,15 @@ export default function CreateListing() {
       }
       Promise.all(promises).then((urls) => {
         setFormData({ ...formData, imageUrls: formData.imageUrls.concat(urls) })
-      }).catch((err)=>{
+        setUploading(false)
+      })
+      .catch((err)=>{
         setImageUploadError("image upload failed")
       })
     }
     else{
 setImageUploadError("you can only upload 6 images")
+setUploading(false)
     }
   }
 
@@ -64,6 +70,10 @@ setImageUploadError("you can only upload 6 images")
         }
       )
     })
+  }
+
+  const handleRemoveImage =(index)=>{
+    setFormData({...formData,imageUrls:formData.imageUrls.filter((_,i)=>i !== index)})
   }
 
   const handleFormSubmit = (e) => {
@@ -217,16 +227,17 @@ setImageUploadError("you can only upload 6 images")
             />
             <button
               type='button'
+              disabled={uploading}
               onClick={handleImageUpload}
               className='text-green-500 border p-3 rounded uppercase border-green-500 hover:text-green-800 disabled:opacity-80'
             >
-              Upload
+            {uploading ? 'Uploading...':'Upload'}
             </button>
           </div>
-          {formData.imageUrls.length >0 && formData.imageUrls.map((url)=>(
-            <div className='flex justify-between bg-slate-200'>
-          <img src={url} key={url} alt="new image" className='w-20 h-20' />
-          <button className='text-red-600 border p-2 my-2 rounded-lg hover:bg-slate-400' >delete</button>
+          {formData.imageUrls.length >0 && formData.imageUrls.map((url,index)=>(
+            <div key={url} className='flex justify-between bg-slate-200'>
+          <img src={url} alt="new image" className='w-20 h-20' />
+          <button onClick={()=>handleRemoveImage(index)} className='text-red-600 border p-2 my-2 rounded-lg hover:opacity-80' >delete</button>
             </div>
           ))
           }
