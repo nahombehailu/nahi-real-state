@@ -1,25 +1,35 @@
 import React, { useState } from 'react'
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { app } from '../firebase'
+import { useSelector } from 'react-redux';
+import {useNavigate} from 'react-router-dom'
 
 export default function CreateListing() {
+    const { currentUser} = useSelector((state) => state.persistedReducer.user);
+    const navigate=useNavigate()
+
   const [files, setFiles] = useState([])
   const[imageUploadError,setImageUploadError]=useState(false)
   const [uploading ,setUploading]=useState(false)
+  const [loading ,setloading]=useState(false)
+  const  [error,setError]=useState(false)
+  const  [success,setSuccess]=useState(false)
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    address: '',
-    sell: false,
-    rent: false,
-    'parking-spot': false,
-    furnished: false,
-    offer: false,
-    beds: 0,
-    baths: 0,
-    'regular-price': 0,
-    'discounted-price': 0,
-    imageUrls: []
+    name:'',
+    description:'',
+    address:'',
+    regularPrice:0,
+    discountPrice:0,
+    bathrooms:0,
+    bedrooms:0,
+    furnished:true,
+    parking:true,
+    type:'',
+    offer:true,
+    imageUrls:[],
+ 
+	  
+
   })
 
   console.log(formData);
@@ -40,8 +50,9 @@ export default function CreateListing() {
       })
     }
     else{
-setImageUploadError("you can only upload 6 images")
+setImageUploadError("you can only upload 6 images per listing")
 setUploading(false)
+
     }
   }
 
@@ -75,12 +86,50 @@ setUploading(false)
   const handleRemoveImage =(index)=>{
     setFormData({...formData,imageUrls:formData.imageUrls.filter((_,i)=>i !== index)})
   }
-
-  const handleFormSubmit = (e) => {
+  console.log(formData)
+  const handleFormSubmit =async (e) => {
     e.preventDefault()
-    console.log(formData)
-    // Here, you can handle the form submission, e.g., send the formData to the server
+    try {
+      setSuccess(false)
+      if(formData.imageUrls.length <1) return(setError("you must upload at least one image"))
+      if(+formData.regularPrice < +formData.discountPrice) return(setError("discounted price must be lessthan the regualr price"))//+ for conver into numbers
+
+        setloading(true)
+        setError(false)
+        const res=await fetch('/api/listing/create',{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({...formData,userRef:currentUser._id})
+        })
+
+        const data= await res.json()
+
+     navigate(`/listing/${data._id}`)
+        
+     
+        setloading(false)
+
+        if(data.success==false ){
+            setError(data.message)
+          return
+        } 
+    
+     
+        
+         setSuccess("succesfully created new listing")
+        //  navigate(`/listing/${data.name._id}`)
+  
+      
+
+       
+    } catch (error) {
+        setError(error.message)
+        setloading(false)
+    }
+ 
+ 
   }
+ 
 
   return (
     <main className='p-3 max-w-4xl mx-auto bg-slate-300'>
@@ -89,14 +138,16 @@ setUploading(false)
         <div className='flex flex-col gap-2 justify-center align-middle flex-1'>
           <input
             type='text'
+            required
             placeholder='Name'
             id='name'
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className='p-3 rounded-lg'
           />
-          <input
+          <textarea
             type='text'
+            required
             placeholder='Description'
             id='description'
             value={formData.description}
@@ -106,13 +157,14 @@ setUploading(false)
           <input
             type='text'
             placeholder='Address'
+            required
             id='address'
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             className='p-3 rounded-lg'
           />
           <div className='flex flex-wrap gap-4'>
-            <div className='flex gap-1'>
+            {/* <div className='flex gap-1'>
               <input
                 type='checkbox'
                 id='sell'
@@ -121,23 +173,24 @@ setUploading(false)
                 className='w-4'
               />
               <span className='text-sm'>sell</span>
-            </div>
+            </div> */}
             <div>
               <input
-                type='checkbox'
-                id='rent'
-                checked={formData.rent}
-                onChange={(e) => setFormData({ ...formData, rent: e.target.checked })}
+                type='text'
+                required
+                id='type'
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 className='w-4'
               />
-              <span className='text-sm'>Rent</span>
+              <span className='text-sm'>Type</span>
             </div>
             <div>
               <input
                 type='checkbox'
-                id='parking-spot'
-                checked={formData['parking-spot']}
-                onChange={(e) => setFormData({ ...formData, 'parking-spot': e.target.checked })}
+                id='parking'
+                checked={formData['parking']}
+                onChange={(e) => setFormData({ ...formData, 'parking': e.target.checked })}
                 className='w-4'
               />
               <span className='text-sm'>Parking spot</span>
@@ -152,6 +205,7 @@ setUploading(false)
               />
               <span className='text-sm'>Furnished</span>
             </div>
+         
             <div>
               <input
                 type='checkbox'
@@ -168,8 +222,8 @@ setUploading(false)
             <div>
               <input
                 type='number'
-                value={formData.beds}
-                onChange={(e) => setFormData({ ...formData, beds: parseInt(e.target.value) })}
+                value={formData.bedrooms}
+                onChange={(e) => setFormData({ ...formData, bedrooms: parseInt(e.target.value) })}
                 className='w-12 h-8 rounded m-3 focus:outline-none'
               />
               <span>Beds</span>
@@ -177,8 +231,8 @@ setUploading(false)
             <div>
               <input
                 type='number'
-                value={formData.baths}
-                onChange={(e) => setFormData({ ...formData, baths: parseInt(e.target.value) })}
+                value={formData.bathrooms}
+                onChange={(e) => setFormData({ ...formData, bathrooms: parseInt(e.target.value) })}
                 className='w-12 h-8 rounded m-3 focus:outline-none'
               />
               <span>Baths</span>
@@ -186,9 +240,9 @@ setUploading(false)
             <div className='flex'>
               <input
                 type='number'
-                id='regular-price'
-                value={formData['regular-price']}
-                onChange={(e) => setFormData({ ...formData, 'regular-price': parseFloat(e.target.value) })}
+                id='regularPrice'
+                value={formData['regularPrice']}
+                onChange={(e) => setFormData({ ...formData, 'regularPrice': parseFloat(e.target.value) })}
                 className='w-18 h-8 sm:w-20 rounded m-3 focus:outline-none'
               />
               <div className='flex flex-col'>
@@ -196,19 +250,22 @@ setUploading(false)
                 <span className='text-sm text- m-1 font-light'>($/month)</span>
               </div>
             </div>
-            <div className='flex'>
-              <input
-                type='number'
-                id='discounted-price'
-                value={formData['discounted-price']}
-                onChange={(e) => setFormData({ ...formData, 'discounted-price': parseFloat(e.target.value) })}
-                className='w-18 h-8 sm:w-20 rounded m-3 focus:outline-none'
-              />
-              <div className='flex flex-col'>
-                <span>Discounted Price</span>
-                <span className='text-sm text- m-1 font-light'>($/month)</span>
-              </div>
-            </div>
+            {formData.offer &&(
+  <div className='flex'>
+  <input
+    type='number'
+    id='discountPrice'
+    value={formData['discountPrice']}
+    onChange={(e) => setFormData({ ...formData, 'discountPrice': parseFloat(e.target.value) })}
+    className='w-18 h-8 sm:w-20 rounded m-3 focus:outline-none'
+  />
+  <div className='flex flex-col'>
+    <span>Discounted Price</span>
+    <span className='text-sm text- m-1 font-light'>($/month)</span>
+  </div>
+</div>
+            )}
+          
           </div>
         </div>
         <div className='flex flex-1 flex-col m-6 gap-3'>
@@ -221,6 +278,7 @@ setUploading(false)
               type='file'
               accept='image/*'
               id='image'
+              // required
               onChange={(e) => setFiles(Array.from(e.target.files))}
               multiple
               className='w-full border p-3'
@@ -243,16 +301,20 @@ setUploading(false)
           }
         <button
             type='submit'
+            disabled={loading || uploading }
+  
             className='bg-slate-700 text-white my-5 border p-3 rounded-lg uppercase border-green-500 hover:bg-slate-500 disabled:opacity-80'
           >
-            Create Listing
+            {loading ? 'Creating...':"Create Listing"}
           </button>
+        <p className='text-red-700 text-center'>   {error ? error:""}</p>
+        <p className='text-red-700 text-center'>   {success ? success:''}</p>
 
         </div>
 
          
       </form>
-      <p className='text-red-600 text-center'>{imageUploadError && imageUploadError}</p> 
+      <p className='text-red-600 text-center'>{imageUploadError ? imageUploadError:""}</p> 
 
     </main>
   )

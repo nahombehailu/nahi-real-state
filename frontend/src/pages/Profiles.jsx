@@ -30,6 +30,9 @@ export default function Profiles() {
   const [fllePerc,setFilePerc]=useState(0)
    const [flleError,setFileflleError]=useState(false)
    const [updateSucess,setUpdateSucess]=useState(false)
+   const [loadingList,setLoadingList]=useState(false)
+   const [errorList,setErrorList]=useState(false)
+   const [userListings,setUserListings]=useState([])
   const dispatch = useDispatch();
   const navigate=useNavigate();
 
@@ -141,9 +144,44 @@ const handleUploadFile=(file)=>{
     }
   )
 }
+const handeleShowListings= async()=>{
+  try {
+    setLoadingList(true)
+    setErrorList(false)
+    const res=await fetch(`/api/user/listings/${currentUser._id}`)
+    const data=await res.json()
+    if(data.success ===false){
+ setErrorList(data.message)
+ setLoadingList(false)
+ return;
+    }
+setErrorList(false)
+setLoadingList(false)
+setUserListings(data)
 
+  } catch (error) {
+    setErrorList(error.message)
+    setLoadingList(false)
+  }
+}
+
+const handeleDeleteListing= async(listingId)=>{
+  try {
+    const res=await fetch(`/api/listing/delete/${listingId}`,{
+      method:'DELETE'
+    })
+    const data=await res.json()
+    if(data.success===false){
+      console.log(data.message);
+    }
+    setUserListings((prev=>prev.filter((listing)=>listing._id !==listingId)))
+  } catch (error) {
+    console.log(error.message);
+  }
+
+}
   return (
-    <div className="max-w-lg mx-auto">
+    <main className="max-w-lg mx-auto">
       <h1 className="font-semibold text-lg text-center">Profiles</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <input
@@ -209,6 +247,34 @@ const handleUploadFile=(file)=>{
         <button onClick={handeleDelete} className="text-red-600 bg-slate-100 p-2 cursor-pointer hover:text-red-300">delete account</button>
         <button  onClick ={handleSignOut}className="text-red-600 bg-slate-100 p-2">signout</button>
       </div>
-    </div>
+      <button type='button' onClick={handeleShowListings} className=' text-green-700 items-center my-3 hover:bg-gray-400
+       border p-3 bg-gray-200 w-full' >Show Listings</button>
+       <div>
+        <h1></h1>
+
+        {userListings && userListings.length >0&&(
+        
+          userListings.map((listing)=>(
+           
+            <div key={listing._id} className='flex gap-4 justify-between border border-b-white m-3'>
+
+              <Link to={`/listings${currentUser._id}`}>
+              <img src={listing.imageUrls[0]} alt="listing cover" className='w-16 h-16 object-contain' />
+              </Link>
+              <Link to={`/listings/${currentUser._id}`}>
+              <p className='text-sm font-semibold hover:underline truncate'>{listing.name}</p>
+              </Link>
+              <div className='flex flex-col align-middle justify-center gap-2'>
+                <button onClick={()=>handeleDeleteListing(listing._id)} className='text-red-600 uppercase text-center hover:opacity-60'>delete</button>
+                <Link to={`update-listing/${listing._id}`}>
+                <button className='text-green-600 uppercase text-center'>edit</button>
+                </Link>
+              
+              </div>
+            </div>
+          ))
+        )}
+       </div>
+    </main>
   );
 }
