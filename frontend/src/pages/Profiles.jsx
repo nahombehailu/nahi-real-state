@@ -261,7 +261,7 @@ const handeleDeleteListing= async(listingId)=>{
               <Link to={`/listings${currentUser._id}`}>
               <img src={listing.imageUrls[0]} alt="listing cover" className='w-16 h-16 object-contain' />
               </Link>
-              <Link to={`/listings/${currentUser._id}`}>
+              <Link to={`/listing/${listing._id}`}>
               <p className='text-sm font-semibold hover:underline truncate'>{listing.name}</p>
               </Link>
               <div className='flex flex-col align-middle justify-center gap-2'>
