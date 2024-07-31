@@ -49,17 +49,16 @@ const handleChange=(e)=>{
 
   console.log(formData);
   return (
-    <div className='w-full'>
-      <div className='w-50'>
-   <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center m-10'>
-    <input type="text" id='email' onChange={handleChange}  placeholder='email' className='py-2 px-10 rounded-md focus:outline-none' />
-    <label htmlFor="password">password</label>
-    <input type="text" id='password' onChange={handleChange}  placeholder='password' className='py-2 px-10 rounded-md focus:outline-none'/>
+    <div className='max-w-2xl mx-auto mt-20'>
+    
+   <form onSubmit={handleSubmit} className='flex flex-col justify-center items-center '>
+    <input type="text" id='email' onChange={handleChange}  placeholder='email' className='m-3 w- p-3 px-20 sm:w-full' />
+    <input type="text" id='password' onChange={handleChange}  placeholder='password' className='m-3 w- p-3 px-20 sm:w-full' />
     <button disabled={loading} className='text-red-300 rounded bg-green-700 m-3 w- p-3 px-20 sm:w-full '>
       {loading? loading :'signin'}</button>
       <OAuth />
    </form>
-   </div>
+  
    <div className='flex justify-center items-center gap-2'>
     <p>don`t` have an account</p><Link to='/signup' className='text-gray-400'>signup</Link>
    </div>

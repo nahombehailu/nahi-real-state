@@ -5,13 +5,19 @@ import SwiperCore from 'swiper'
 import {Navigation} from 'swiper/modules'
 import 'swiper/css/bundle'
 import { FaBath, FaBed, FaChair, FaMapMarked, FaMapMarkedAlt, FaMapMarkerAlt, FaParking } from "react-icons/fa"
+import { useSelector } from "react-redux"
+import Contact from "../componets/Contact"
 
 export default function Listing() {
     SwiperCore.use([Navigation])
+    const { currentUser} = useSelector((state) => state.persistedReducer.user);
+
     const params=useParams();
     const [listing,setListing]=useState(null);
     const [loading,setLoading]=useState(false);
     const [error,setError]=useState(false);
+    const [contact,setContact]=useState(false);
+    
     
 
 
@@ -35,6 +41,7 @@ export default function Listing() {
                 setLoading(false)
             }
 
+
         };
        fetchingData();
        },[params.listingId]);
@@ -42,7 +49,7 @@ export default function Listing() {
   return (
     <main >
      {listing && !loading && !error &&(
-        <div>
+        <div className="">
         <Swiper navigation>
             {listing.imageUrls.map((url)=>( 
            
@@ -85,7 +92,7 @@ export default function Listing() {
     </li>
 </ul>
 
- 
+
 </div> 
 
     
@@ -93,8 +100,18 @@ export default function Listing() {
      
      }
 
-<div>
-    
+<div className="m-3">
+    {/* {currentUser && listing && listing?.userRef !==currentUser._id &&(
+   */}
+    <div className="max-w-2xl mx-auto ">
+        {!contact &&(
+        <button onClick={()=>(setContact(true))} className=" bg-slate-700 rounded-lg uppercase text-white text-center w-full p-3">contact landlord</button>
+
+        )}
+    </div>
+{/* )
+}  */}
+{contact && (<Contact listing={listing} />) }
 </div>
  
     </main>

@@ -1,10 +1,29 @@
 import {FaSearch } from 'react-icons/fa'
-import { Link } from 'react-router-dom'
+import { Link,useNavigate } from 'react-router-dom'
 import {useSelector} from 'react-redux'
+import { useEffect, useState } from 'react'
 
 
 export default function Header() {
   const {currentUser}=useSelector((state)=>state.persistedReducer.user)
+  const [searchTerm,setSearchTerm]=useState('')
+  const navigate=useNavigate()
+  const handleSubmit=(e)=>{
+    e.preventDefault()
+    const urlParams=new URLSearchParams(window.location.search)
+    urlParams.set('searchTerm',searchTerm)
+    const searachQuery=urlParams.toString()
+    navigate(`/search?${searachQuery}`)
+
+  }
+  useEffect(()=>{
+    const urlParams=new URLSearchParams(location.search)
+    const serachTermFromUrl=urlParams.get('searchTerm')
+    if(serachTermFromUrl){
+      setSearchTerm(serachTermFromUrl) 
+    }
+
+  },[location.search])
 
   return (
     <header className='bg-slate-500' >
@@ -17,9 +36,17 @@ export default function Header() {
 </Link>
      </div>
      {/* serach */}
-     <form className='flex p-3 items-center justify-between bg-slate-100 '>
-        <input type="serach" placeholder='Search here...' className='focus:outline-none hidden sm:inline w-34 sm:w-64' />
+     <form onSubmit={handleSubmit} className='flex p-3 items-center justify-between bg-slate-100 '>
+        <input type="serach" 
+        placeholder='Search here...' 
+        className='focus:outline-none hidden sm:inline w-34 sm:w-64'
+        value={searchTerm}
+        onChange={(e)=>setSearchTerm(e.target.value)}
+        />
+        
+        <button>
         <FaSearch />
+        </button>
      </form>
     {/* about and signin */}
     <ul className='flex gap-2 '>
